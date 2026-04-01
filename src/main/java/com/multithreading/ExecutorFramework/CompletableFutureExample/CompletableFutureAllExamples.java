@@ -1,14 +1,40 @@
 package com.multithreading.ExecutorFramework.CompletableFutureExample;
 
-
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+/*
+============================= COMPLETABLE FUTURE (INTERVIEW REVISION) =============================
+
+1. What is CompletableFuture?
+   - An advanced version of Future
+   - Supports async, non-blocking programming
+   - Allows chaining, combining, and handling results
+
+2. Why CompletableFuture?
+   ✔ Non-blocking
+   ✔ Better than Future
+   ✔ Supports chaining & composition
+
+3. Key Concepts:
+   - Async execution
+   - Functional chaining
+   - Error handling
+
+4. join() vs get():
+   - join() → unchecked exception
+   - get()  → checked exception
+
+==============================================================================================
+*/
+
 public class CompletableFutureAllExamples {
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args)
+            throws ExecutionException, InterruptedException {
 
-        // 1️⃣ runAsync (No return value)
+        // ================= 1. runAsync =================
+        // No return value
         CompletableFuture<Void> runAsyncExample =
                 CompletableFuture.runAsync(() ->
                         System.out.println("runAsync executed"));
@@ -16,14 +42,16 @@ public class CompletableFutureAllExamples {
         runAsyncExample.join();
 
 
-        // 2️⃣ supplyAsync (Return value)
+        // ================= 2. supplyAsync =================
+        // Returns value
         CompletableFuture<String> supplyAsyncExample =
                 CompletableFuture.supplyAsync(() -> "Hello");
 
         System.out.println("supplyAsync: " + supplyAsyncExample.join());
 
 
-        // 3️⃣ thenApply (Transform result)
+        // ================= 3. thenApply =================
+        // Transform result
         CompletableFuture<String> thenApplyExample =
                 CompletableFuture.supplyAsync(() -> "java")
                         .thenApply(str -> str.toUpperCase());
@@ -31,28 +59,35 @@ public class CompletableFutureAllExamples {
         System.out.println("thenApply: " + thenApplyExample.join());
 
 
-        // 4️⃣ thenAccept (Consume result)
+        // ================= 4. thenAccept =================
+        // Consume result (no return)
         CompletableFuture.supplyAsync(() -> "Consumed Value")
-                .thenAccept(val -> System.out.println("thenAccept: " + val))
+                .thenAccept(val ->
+                        System.out.println("thenAccept: " + val))
                 .join();
 
 
-        // 5️⃣ thenRun (Run after completion, no input/output)
+        // ================= 5. thenRun =================
+        // No input, no output
         CompletableFuture.supplyAsync(() -> "Task Finished")
-                .thenRun(() -> System.out.println("thenRun executed"))
+                .thenRun(() ->
+                        System.out.println("thenRun executed"))
                 .join();
 
 
-        // 6️⃣ thenCompose (Dependent async call)
+        // ================= 6. thenCompose =================
+        // Chain dependent async calls
         CompletableFuture<String> composeExample =
                 CompletableFuture.supplyAsync(() -> "Order")
                         .thenCompose(order ->
-                                CompletableFuture.supplyAsync(() -> order + " -> Payment"));
+                                CompletableFuture.supplyAsync(() ->
+                                        order + " -> Payment"));
 
         System.out.println("thenCompose: " + composeExample.join());
 
 
-        // 7️⃣ thenCombine (Combine two independent futures)
+        // ================= 7. thenCombine =================
+        // Combine independent futures
         CompletableFuture<String> f1 =
                 CompletableFuture.supplyAsync(() -> "User");
 
@@ -65,7 +100,8 @@ public class CompletableFutureAllExamples {
         System.out.println("thenCombine: " + combineExample.join());
 
 
-        // 8️⃣ allOf (Wait for all tasks)
+        // ================= 8. allOf =================
+        // Wait for all tasks
         CompletableFuture<Void> allOfExample =
                 CompletableFuture.allOf(f1, f2);
 
@@ -73,24 +109,26 @@ public class CompletableFutureAllExamples {
         System.out.println("allOf completed");
 
 
-        // 9️⃣ anyOf (First completed task)
+        // ================= 9. anyOf =================
+        // First completed task
         CompletableFuture<Object> anyOfExample =
                 CompletableFuture.anyOf(f1, f2);
 
         System.out.println("anyOf: " + anyOfExample.join());
 
 
-        // 🔟 exceptionally (Exception handling)
-        CompletableFuture<String> exceptionExample =
+        // ================= 10. exceptionally =================
+        // Handle exceptions
+        CompletableFuture<Object> exceptionExample =
                 CompletableFuture.supplyAsync(() -> {
-                    if (true) throw new RuntimeException("Error");
-                    return "Success";
+                    throw new RuntimeException("Error");
                 }).exceptionally(ex -> "Fallback Value");
 
         System.out.println("exceptionally: " + exceptionExample.join());
 
 
-        // 1️⃣1️⃣ handle (Success + Failure handling)
+        // ================= 11. handle =================
+        // Handle success + failure
         CompletableFuture<String> handleExample =
                 CompletableFuture.supplyAsync(() -> "Handle Test")
                         .handle((res, ex) -> {
@@ -101,7 +139,8 @@ public class CompletableFutureAllExamples {
         System.out.println("handle: " + handleExample.join());
 
 
-        // 1️⃣2️⃣ whenComplete (Post completion action)
+        // ================= 12. whenComplete =================
+        // Post-completion action (no change in result)
         CompletableFuture.supplyAsync(() -> "Completed Task")
                 .whenComplete((res, ex) ->
                         System.out.println("whenComplete: " + res))
