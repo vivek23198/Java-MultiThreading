@@ -37,6 +37,7 @@ class SharedObj {
 
         // Busy waiting (spin loop)
         while (!flag) {
+            System.out.println("Reading Flag since it is False");
             // Without volatile → may never exit loop ❌
         }
 

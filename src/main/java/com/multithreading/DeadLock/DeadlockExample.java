@@ -23,53 +23,36 @@ package com.multithreading.DeadLock;
 =========================================================================================
 */
 
-class Resource {
+class DeadlockDemo {
 
-    // ================= METHOD 1 =================
-    public synchronized void method1(Resource r) {
-
-        String threadName = Thread.currentThread().getName();
-
-        // Lock acquired on current object
-        System.out.println(threadName + " locked Resource1");
-
-        try {
-            Thread.sleep(100); // simulate delay
-        } catch (Exception e) {}
-
-        // Trying to acquire second lock
-        System.out.println(threadName + " trying to lock Resource2");
-
-        // Nested lock → possible deadlock
-        r.method2();
-    }
-
-    // ================= METHOD 2 =================
-    public synchronized void method2() {
-
-        String threadName = Thread.currentThread().getName();
-
-        // Lock acquired on second object
-        System.out.println(threadName + " locked Resource2");
-    }
-}
-
-public class DeadlockExample {
+    static final Object lock1 = new Object();
+    static final Object lock2 = new Object();
 
     public static void main(String[] args) {
 
-        Resource r1 = new Resource();
-        Resource r2 = new Resource();
-
-        // Thread 1
         Thread t1 = new Thread(() -> {
-            r1.method1(r2);   // Locks r1 → waits for r2
-        }, "Thread-1");
+            synchronized (lock1) {
+                System.out.println("Thread 1 acquired lock1");
 
-        // Thread 2
+                try { Thread.sleep(100); } catch (Exception e) {}
+
+                synchronized (lock2) {
+                    System.out.println("Thread 1 acquired lock2");
+                }
+            }
+        });
+
         Thread t2 = new Thread(() -> {
-            r2.method1(r1);   // Locks r2 → waits for r1
-        }, "Thread-2");
+            synchronized (lock2) {
+                System.out.println("Thread 2 acquired lock2");
+
+                try { Thread.sleep(100); } catch (Exception e) {}
+
+                synchronized (lock1) {
+                    System.out.println("Thread 2 acquired lock1");
+                }
+            }
+        });
 
         t1.start();
         t2.start();

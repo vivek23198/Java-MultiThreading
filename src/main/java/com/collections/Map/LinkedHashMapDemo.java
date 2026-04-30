@@ -8,58 +8,70 @@ import java.util.Map;
 ============================= LINKEDHASHMAP (INTERVIEW REVISION) =============================
 
 1. What is LinkedHashMap?
-   - It is a HashMap + Doubly Linked List
-   - Maintains ORDER of elements
+   - HashMap + Doubly Linked List
+   - Maintains predictable iteration order
 
 2. Types of Ordering:
    a) Insertion Order (default)
-      → elements appear in order they were inserted
+      → Order in which elements were added
 
-   b) Access Order (when accessOrder = true)
-      → elements move to end when accessed (LRU behavior)
+   b) Access Order (accessOrder = true)
+      → Recently accessed elements move to END
+      → Used in LRU Cache
 
 3. Internal Structure:
-   - Array of buckets (same as HashMap)
-   - Each entry also has:
-        → before pointer
-        → after pointer
-   - Forms a Doubly Linked List
+   - Same as HashMap (array + bucket)
+   - PLUS doubly linked list pointers:
+        before ← node → after
 
 4. Time Complexity:
    - put() → O(1)
    - get() → O(1)
+   - remove() → O(1)
    - iteration → O(n)
 
 5. Space Complexity:
-   - O(n) (extra memory for linked list pointers)
+   - O(n) + extra memory for before/after pointers
 
-6. Key Use Case:
-   - LRU Cache (Least Recently Used)
-   - Maintain predictable iteration order
+6. Key Use Cases:
+   - LRU Cache
+   - Maintain insertion/access order
 
 7. Difference from HashMap:
-   - HashMap → No order
-   - LinkedHashMap → Maintains order
+   - HashMap → no order
+   - LinkedHashMap → ordered
 
 ==============================================================================================
 */
 
 public class LinkedHashMapDemo {
+
     public static void main(String[] args) {
 
-        // Creating LinkedHashMap with:
-        // initial capacity = 11
-        // load factor = 0.3
-        // accessOrder = true → maintains ACCESS ORDER (LRU style)
+        /*
+         * CREATION
+         * --------
+         * capacity = 11
+         * loadFactor = 0.3
+         * accessOrder = true → LRU behavior
+         */
         LinkedHashMap<String, Integer> linkedHashMap =
-                new LinkedHashMap<>(11, 0.3f, true); // uses doubly linked list internally
+                new LinkedHashMap<>(11, 0.3f, true);
 
-        // Insertion (insertion order initially)
+
+        /*
+         * INSERTION
+         */
         linkedHashMap.put("Orange", 10);
         linkedHashMap.put("Apple", 20);
         linkedHashMap.put("Guava", 13);
 
-        // Accessing elements → moves them to END (since accessOrder = true)
+
+        /*
+         * ACCESS ORDER DEMO
+         * -----------------
+         * Accessing elements moves them to END
+         */
         linkedHashMap.get("Apple");
         linkedHashMap.get("Orange");
         linkedHashMap.get("Guava");
@@ -68,39 +80,103 @@ public class LinkedHashMapDemo {
         linkedHashMap.get("Apple");
         linkedHashMap.get("Guava");
 
-        // Iteration will reflect ACCESS ORDER (recently accessed last)
+
+        /*
+         * ITERATION → shows ACCESS ORDER
+         */
         for (Map.Entry<String, Integer> entry : linkedHashMap.entrySet()) {
             System.out.println(entry.getKey() + ": " + entry.getValue());
         }
 
-        // ================= HASHMAP EXAMPLE =================
 
-        // HashMap does NOT maintain order
+
+        /*
+         * HASHMAP COMPARISON
+         */
         HashMap<String, Integer> hashMap = new HashMap<>();
-        // Insert values
+
         hashMap.put("Shubham", 91);
         hashMap.put("Bob", 80);
         hashMap.put("Akshit", 78);
 
-        // Creating LinkedHashMap from existing HashMap
-        // Copies entries (order depends on HashMap iteration → unpredictable)
-        LinkedHashMap<String, Integer> linkedHashMap1 = new LinkedHashMap<>(hashMap);
+
+        /*
+         * Creating LinkedHashMap from HashMap
+         *
+         * ⚠️ Order depends on HashMap iteration
+         * → NOT guaranteed
+         */
+        LinkedHashMap<String, Integer> linkedHashMap1 =
+                new LinkedHashMap<>(hashMap);
 
         System.out.println("LinkedHashMap Creation .....");
-        // LinkedHashMap does not gurantee order bcoz hashmap is not in the order
+
         for (Map.Entry<String, Integer> entry : linkedHashMap1.entrySet()) {
             System.out.println(entry.getKey() + ": " + entry.getValue());
         }
 
-        // getOrDefault():
-        // If key exists → return value
-        // Else → return default value
-        Integer res = hashMap.getOrDefault("Vipul", 0); // returns 0
 
-        // Updating existing key → replaces value
+
+        /*
+         * getOrDefault()
+         */
+        Integer res = hashMap.getOrDefault("Vipul", 0);
+        System.out.println("Default value: " + res);
+
+
+
+        /*
+         * UPDATE
+         */
         hashMap.put("Shubham", 92);
 
-        // Final map (order NOT guaranteed)
         System.out.println(hashMap);
+
+
+
+        /*
+         * 🔥 LRU CACHE IMPLEMENTATION (IMPORTANT)
+         * ---------------------------------------
+         * Override removeEldestEntry()
+         */
+
+        LinkedHashMap<Integer, String> lruCache =
+                new LinkedHashMap<>(3, 0.75f, true) {
+
+                    protected boolean removeEldestEntry(Map.Entry<Integer, String> eldest) {
+                        return size() > 3; // max size = 3
+                    }
+                };
+
+        lruCache.put(1, "A");
+        lruCache.put(2, "B");
+        lruCache.put(3, "C");
+
+        lruCache.get(1); // access → moves to end
+
+        lruCache.put(4, "D"); // removes least recently used (key=2)
+
+        System.out.println("LRU Cache: " + lruCache);
+
+
+
+        /*
+         * INTERVIEW TRAPS ⚠️
+         * -----------------
+         *
+         * Q1: Is LinkedHashMap slower than HashMap?
+         * Ans: Slightly (due to extra pointers)
+         *
+         * Q2: Does it maintain sorted order?
+         * Ans: No (use TreeMap for sorting)
+         *
+         * Q3: Difference between insertion and access order?
+         * Ans:
+         * insertion → fixed order
+         * access → dynamic (LRU)
+         *
+         * Q4: Can it be used for cache?
+         * Ans: Yes (LRU implementation)
+         */
     }
 }
